@@ -1,5 +1,6 @@
 package Processor;
 
+import Model.Email;
 import Model.Word;
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,10 +12,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -26,58 +23,51 @@ import java.util.regex.Pattern;
  * @author Arces
  */
 public class WordCounter {
-
-    private BufferedReader br;
-
-    public ArrayList<Word> countWords(String filename) {
+    public ArrayList<Word> countWords(String body) {
         ArrayList<Word> wordList = new ArrayList<>(); //contains the word and the count
         ArrayList<String> words;
         Set<String> wordSet;
-                
-        try {
-            br = new BufferedReader(new FileReader(new File(filename)));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
 
-        //Build the string
-        String content = "", s;
-        try {
-            while ((s = br.readLine()) != null) {
-                content += s;
-            }
-            //Clean and organize content
-            //convert to lower case
-            content = content.toLowerCase();
+        //Clean and organize content
+        //convert to lower case
+        body = body.toLowerCase();
+/*
+        //remove all punctuation marks
+        body = body.replaceAll("\\p{P}", "");
 
-            //remove all punctuation marks
-            content = content.replaceAll("\\p{P}", "");
+        //remove greater than less than sign
+        body = body.replaceAll("<", "").replaceAll(">", "");
+*/
+        //remove all digits, special characters, and extra spaces 
+        body = body.replaceAll("\\d", "").replaceAll("[^a-zA-Z0-9]", " ").replaceAll("\\s+", " ");
 
-            //remove greater than less than sign
-            content = content.replaceAll("<", "").replaceAll(">", "");
+        //split the content then make it an arraylist
+        words = new ArrayList<>(Arrays.asList(body.split(" ")));
 
-            //remove all digits
-            content = content.replaceAll("\\d", "");
+        //use hashset to get the frequency of words
+        wordSet = new HashSet<>(words);
 
-            //make spaces only one
-            content = content.replaceAll("\\s+", " ");
-
-            //split the content then make it an arraylist
-            words = new ArrayList<>(Arrays.asList(content.split(" ")));
-
-            //use hashset to get the frequency of words
-            wordSet = new HashSet<>(words);
-
-            for (String key : wordSet) {
-                Word word = new Word();
-                word.setWord(key);
-                word.setCount(Collections.frequency(words, key));
-                wordList.add(word);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        for (String key : wordSet) {
+            Word word = new Word();
+            word.setWord(key);
+            word.setCount(Collections.frequency(words, key));
+            wordList.add(word);
         }
 
         return wordList;
+    }
+    
+    public void computeWordsProbability(Email email){
+        float totalWords = 0;
+        
+        //get total number of words in email
+        for(Word word: email.getWordList()){
+            totalWords += word.getCount();
+        }
+        
+        //get probability of word in email
+        for(Word word: email.getWordList()){
+            word.setProbability(word.getCount() / totalWords);
+        }
     }
 }

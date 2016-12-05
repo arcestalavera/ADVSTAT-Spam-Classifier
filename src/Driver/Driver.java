@@ -6,11 +6,11 @@
 
 package Driver;
 
+import GUI.GUI;
 import Model.Word;
 import Processor.WordCounter;
 import java.util.ArrayList;
 import java.util.Scanner;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -22,17 +22,7 @@ public class Driver {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        WordCounter wc = new WordCounter();
-        Scanner sc = new Scanner(System.in);
-        
-        System.out.print("Enter File Name: ");
-        String filename = sc.nextLine();
-        ArrayList<Word> wordList = wc.countWords("email/" + filename);//count words on email
-        
-        System.out.println("WORD FREQUENCY: ");
-        for(Word word: wordList){
-            System.out.println("\t" + word.getWord() + ": " + word.getCount());
-        }
+        new GUI().setVisible(true);
     }
     
 }

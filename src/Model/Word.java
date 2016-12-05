@@ -13,6 +13,7 @@ package Model;
 public class Word {
     private String word;
     private int count;
+    private float probability;
 
     /**
      * @return the word
@@ -40,6 +41,20 @@ public class Word {
      */
     public void setCount(int count) {
         this.count = count;
+    }
+
+    /**
+     * @return the probability
+     */
+    public float getProbability() {
+        return probability;
+    }
+
+    /**
+     * @param probability the probability to set
+     */
+    public void setProbability(float probability) {
+        this.probability = probability;
     }
     
 }
