@@ -5,7 +5,9 @@
  */
 package Processor;
 
+import Model.ConfusionMatrix;
 import Model.Email;
+import Model.TrainedSet;
 import Model.Word;
 import java.io.FileWriter;
 import java.util.ArrayList;
@@ -19,10 +21,14 @@ import java.util.Set;
 public class CSVWriter {
 
     private FileWriter fw;
+    private StringBuilder sb;
 
+    public CSVWriter(){
+        this.sb = new StringBuilder();
+    }
+    
     public void exportFeatureMap(String fileName, ArrayList<Email> emailList) {
         Set<String> wordSet = new HashSet<>();
-        StringBuilder sb = new StringBuilder();
         ArrayList<Word> wordList;
         Word emailWord;
         
@@ -57,7 +63,7 @@ public class CSVWriter {
                 for (String word : wordSet) {
                     emailWord = email.getEmailWord(word);
                     if (emailWord != null) {
-                        sb.append(emailWord.getProbability());
+                        sb.append(emailWord.getCount());
                     } else {
                         sb.append("0");
                     }
@@ -72,9 +78,65 @@ public class CSVWriter {
                 fw.append(sb.toString());
             }
 
+            sb.setLength(0);
             fw.flush();
             fw.close();
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void exportTrainedDataset(String fileName, TrainedSet ts){
+        ArrayList<Word> spamWords = ts.getSpamWords();
+        ArrayList<Word> nonSpamWords = ts.getNonSpamWords();
+                
+        try{
+            fw = new FileWriter(fileName);
+            
+            //create header
+            sb.append("Word, Spam, Not Spam");
+            fw.append(sb.toString() + "\n");
+            
+            for(int i = 0; i < spamWords.size(); i++){
+                sb.setLength(0);
+                sb.append(spamWords.get(i).getWord()).append(",");
+                sb.append(spamWords.get(i).getProbability()).append(",").append(nonSpamWords.get(i).getProbability());
+                
+                fw.append(sb.toString() + "\n");
+            }
+            
+            sb.setLength(0);
+            sb.append("PriorProb,");
+            sb.append(ts.getPriorProbability()[0]);
+            sb.append(",");
+            sb.append(ts.getPriorProbability()[1]);
+            fw.append(sb.toString());
+            
+            sb.setLength(0);
+            fw.flush();
+            fw.close();
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+    
+    public void exportConfusionMatrix(String fileName, ConfusionMatrix cm){
+        try{
+            fw = new FileWriter(fileName);
+            
+            sb.append(",Spam, Not Spam\n");
+            sb.append("Spam, ").append(cm.getTrueSpam()).append(", ").append(cm.getFalseSpam()).append("\n");
+            sb.append("Not Spam, ").append(cm.getFalseNonSpam()).append(", ").append(cm.getTrueNonSpam()).append("\n");
+            sb.append("Precision: ").append(cm.computePrecision()).append(" %\n");
+            sb.append("Recall: ").append(cm.computeRecall()).append(" %\n");
+            sb.append("Accuracy: ").append(cm.computeAccuracy()).append(" %");
+            
+            fw.write(sb.toString());
+            
+            sb.setLength(0);
+            fw.flush();
+            fw.close();
+        } catch(Exception e){
             e.printStackTrace();
         }
     }

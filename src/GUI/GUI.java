@@ -5,8 +5,13 @@
  */
 package GUI;
 
+import Model.ConfusionMatrix;
 import Model.Email;
+import Model.TrainedSet;
+import Processor.CSVReader;
 import Processor.CSVWriter;
+import Processor.Classifier;
+import Processor.DatasetTrainer;
 import Processor.FeatureMapConstructor;
 import java.io.File;
 import java.util.ArrayList;
@@ -20,13 +25,18 @@ public class GUI extends javax.swing.JFrame {
 
     private JFileChooser jfc;
     private File inputFile;
+    private ArrayList<Email> trainData, testData;
+    private TrainedSet trainedData;
+    private CSVReader reader;
+    private boolean canClassify;
+    private int classifyCount;
 
     /**
      * Creates new form GUI
      */
     public GUI() {
         initComponents();
-        
+
         //GUI Adjustments
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -39,10 +49,16 @@ public class GUI extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         setLocationRelativeTo(null);
-        
 
         //File Chooser
         this.jfc = new JFileChooser();
+
+        //CSV Reader
+        this.reader = new CSVReader();
+
+        //classifier
+        this.canClassify = false;
+        this.classifyCount = 0;
     }
 
     /**
@@ -61,11 +77,18 @@ public class GUI extends javax.swing.JFrame {
         featureFileLabel = new javax.swing.JLabel();
         featureFileBtn = new javax.swing.JButton();
         featureConstructBtn = new javax.swing.JButton();
-        trainPanel = new javax.swing.JPanel();
-        featureTitleLabel1 = new javax.swing.JLabel();
-        trainFileLabel = new javax.swing.JLabel();
-        trainFileBtn = new javax.swing.JButton();
-        trainStartBtn = new javax.swing.JButton();
+        classifyPanel = new javax.swing.JPanel();
+        classifyLabel = new javax.swing.JLabel();
+        trainedFileLabel = new javax.swing.JLabel();
+        trainedFileBtn = new javax.swing.JButton();
+        classifyBtn = new javax.swing.JButton();
+        testFileLabel = new javax.swing.JLabel();
+        testFileBtn = new javax.swing.JButton();
+        trainingPanel = new javax.swing.JPanel();
+        trainingTitleLabel = new javax.swing.JLabel();
+        trainingFileLabel = new javax.swing.JLabel();
+        trainingFileBtn = new javax.swing.JButton();
+        trainingTrainBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Spam Classifier");
@@ -123,7 +146,7 @@ public class GUI extends javax.swing.JFrame {
                     .addComponent(featureTitleLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(featureFileLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(featureFileBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(featureConstructBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 262, Short.MAX_VALUE))
+                    .addComponent(featureConstructBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 266, Short.MAX_VALUE))
                 .addContainerGap())
         );
         featurePanelLayout.setVerticalGroup(
@@ -140,48 +163,138 @@ public class GUI extends javax.swing.JFrame {
                 .addGap(10, 10, 10))
         );
 
-        trainPanel.setBackground(new java.awt.Color(250, 250, 250));
+        classifyPanel.setBackground(new java.awt.Color(255, 255, 255));
 
-        featureTitleLabel1.setFont(new java.awt.Font("Century Gothic", 1, 12)); // NOI18N
-        featureTitleLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        featureTitleLabel1.setText("Train Machine");
+        classifyLabel.setFont(new java.awt.Font("Century Gothic", 1, 12)); // NOI18N
+        classifyLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        classifyLabel.setText("Classify Spam Mails");
 
-        trainFileLabel.setFont(new java.awt.Font("Century Gothic", 2, 10)); // NOI18N
-        trainFileLabel.setForeground(new java.awt.Color(102, 102, 102));
-        trainFileLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        trainFileLabel.setText("Please Select a File");
+        trainedFileLabel.setFont(new java.awt.Font("Century Gothic", 2, 10)); // NOI18N
+        trainedFileLabel.setForeground(new java.awt.Color(102, 102, 102));
+        trainedFileLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        trainedFileLabel.setText("Select Trained File");
 
-        trainFileBtn.setText("Select File");
-        trainFileBtn.setFocusable(false);
+        trainedFileBtn.setText("Select File");
+        trainedFileBtn.setFocusable(false);
+        trainedFileBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                trainedFileBtnActionPerformed(evt);
+            }
+        });
 
-        trainStartBtn.setText("Start Training");
-        trainStartBtn.setEnabled(false);
-        trainStartBtn.setFocusable(false);
+        classifyBtn.setText("Classify Test Dataset");
+        classifyBtn.setEnabled(false);
+        classifyBtn.setFocusable(false);
+        classifyBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                classifyBtnActionPerformed(evt);
+            }
+        });
 
-        javax.swing.GroupLayout trainPanelLayout = new javax.swing.GroupLayout(trainPanel);
-        trainPanel.setLayout(trainPanelLayout);
-        trainPanelLayout.setHorizontalGroup(
-            trainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(trainPanelLayout.createSequentialGroup()
+        testFileLabel.setFont(new java.awt.Font("Century Gothic", 2, 10)); // NOI18N
+        testFileLabel.setForeground(new java.awt.Color(102, 102, 102));
+        testFileLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        testFileLabel.setText("Select Testing File");
+
+        testFileBtn.setText("Select File");
+        testFileBtn.setFocusable(false);
+        testFileBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                testFileBtnActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout classifyPanelLayout = new javax.swing.GroupLayout(classifyPanel);
+        classifyPanel.setLayout(classifyPanelLayout);
+        classifyPanelLayout.setHorizontalGroup(
+            classifyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(classifyPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(trainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(featureTitleLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(trainFileLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(trainFileBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(trainStartBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 262, Short.MAX_VALUE))
+                .addGroup(classifyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(classifyLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(classifyBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 266, Short.MAX_VALUE)
+                    .addGroup(classifyPanelLayout.createSequentialGroup()
+                        .addGroup(classifyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(trainedFileLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
+                            .addComponent(trainedFileBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(classifyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(testFileLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(testFileBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap())
         );
-        trainPanelLayout.setVerticalGroup(
-            trainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(trainPanelLayout.createSequentialGroup()
+        classifyPanelLayout.setVerticalGroup(
+            classifyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(classifyPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(featureTitleLabel1)
+                .addComponent(classifyLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(trainFileLabel)
+                .addGroup(classifyPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(classifyPanelLayout.createSequentialGroup()
+                        .addComponent(trainedFileLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(trainedFileBtn))
+                    .addGroup(classifyPanelLayout.createSequentialGroup()
+                        .addComponent(testFileLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(testFileBtn)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(trainFileBtn)
+                .addComponent(classifyBtn)
+                .addGap(10, 10, 10))
+        );
+
+        trainingPanel.setBackground(new java.awt.Color(250, 250, 250));
+
+        trainingTitleLabel.setFont(new java.awt.Font("Century Gothic", 1, 12)); // NOI18N
+        trainingTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        trainingTitleLabel.setText("Train Dataset");
+
+        trainingFileLabel.setFont(new java.awt.Font("Century Gothic", 2, 10)); // NOI18N
+        trainingFileLabel.setForeground(new java.awt.Color(102, 102, 102));
+        trainingFileLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        trainingFileLabel.setText("Please Select a File");
+
+        trainingFileBtn.setText("Select File");
+        trainingFileBtn.setFocusable(false);
+        trainingFileBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                trainingFileBtnActionPerformed(evt);
+            }
+        });
+
+        trainingTrainBtn.setText("Train Dataset");
+        trainingTrainBtn.setEnabled(false);
+        trainingTrainBtn.setFocusable(false);
+        trainingTrainBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                trainingTrainBtnActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout trainingPanelLayout = new javax.swing.GroupLayout(trainingPanel);
+        trainingPanel.setLayout(trainingPanelLayout);
+        trainingPanelLayout.setHorizontalGroup(
+            trainingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(trainingPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(trainingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(trainingTitleLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(trainingFileLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(trainingFileBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(trainingTrainBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 266, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        trainingPanelLayout.setVerticalGroup(
+            trainingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(trainingPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(trainingTitleLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(trainStartBtn)
+                .addComponent(trainingFileLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(trainingFileBtn)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(trainingTrainBtn)
                 .addGap(10, 10, 10))
         );
 
@@ -191,7 +304,8 @@ public class GUI extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(headerPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(featurePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(trainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(classifyPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(trainingPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -200,8 +314,9 @@ public class GUI extends javax.swing.JFrame {
                 .addGap(0, 0, 0)
                 .addComponent(featurePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
-                .addComponent(trainPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, 0))
+                .addComponent(trainingPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
+                .addComponent(classifyPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
@@ -226,47 +341,129 @@ public class GUI extends javax.swing.JFrame {
 
     private void featureConstructBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_featureConstructBtnActionPerformed
         featureFileLabel.setText("Constructing Feature Map. . .");
-        
+
         FeatureMapConstructor fmc = new FeatureMapConstructor();
         ArrayList<Email> emailList = fmc.constructFeatureMap(inputFile);
-        
-        /*
-        float totalProb = 0;
-        
-        for(Email e: emailList){
-            totalProb = 0;
-            System.out.println("Email: " + (e.getIsSpam()? "spam": "not spam"));
-            for(Word w: e.getWordList()){
-                System.out.println("\t" + w.getWord() + ": " + w.getCount() + " [" + w.getProbability() + "]");
-                totalProb += w.getProbability();
-            }
-            System.out.println("Sum of Probability: " + totalProb);
-        }
-        */
+
         featureFileLabel.setText("Feature Map Complete!");
-        
+
         //export feature map
         int val = jfc.showSaveDialog(this);
-        if(val == JFileChooser.APPROVE_OPTION){
+        if (val == JFileChooser.APPROVE_OPTION) {
             CSVWriter writer = new CSVWriter();
-            
+
             writer.exportFeatureMap(jfc.getSelectedFile().getPath(), emailList);
         }
     }//GEN-LAST:event_featureConstructBtnActionPerformed
-    
+
+    private void trainedFileBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_trainedFileBtnActionPerformed
+        int val = jfc.showOpenDialog(this);
+        if (val == JFileChooser.APPROVE_OPTION) {
+
+            trainedData = reader.readTrainedSet(jfc.getSelectedFile());
+
+            //update GUI
+            trainedFileLabel.setText("Trained Data Ready!");
+            classifyCount++;
+
+            if (classifyCount == 2) {
+                canClassify = true;
+            }
+        } else {
+            trainedFileLabel.setText("Select Trained File");
+
+            classifyCount--;
+            canClassify = false;
+        }
+
+        if (canClassify) {
+            classifyBtn.setEnabled(true);
+        } else {
+            classifyBtn.setEnabled(false);
+        }
+    }//GEN-LAST:event_trainedFileBtnActionPerformed
+
+    private void testFileBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testFileBtnActionPerformed
+        int val = jfc.showOpenDialog(this);
+        if (val == JFileChooser.APPROVE_OPTION) {
+            testData = reader.readEmail(jfc.getSelectedFile());
+
+            testFileLabel.setText("Test Data Ready!");
+
+            classifyCount++;
+
+            if (classifyCount == 2) {
+                canClassify = true;
+            }
+        } else {
+            trainedFileLabel.setText("Select Test File");
+
+            classifyCount--;
+            canClassify = false;
+        }
+
+        if (canClassify) {
+            classifyBtn.setEnabled(true);
+        } else {
+            classifyBtn.setEnabled(false);
+        }
+    }//GEN-LAST:event_testFileBtnActionPerformed
+
+    private void trainingFileBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_trainingFileBtnActionPerformed
+        int val = jfc.showOpenDialog(this);
+        if (val == JFileChooser.APPROVE_OPTION) {
+            trainData = reader.readEmail(jfc.getSelectedFile());
+            
+            trainingFileLabel.setText("Training of Dataset Ready!");
+            trainingTrainBtn.setEnabled(true);
+        }
+    }//GEN-LAST:event_trainingFileBtnActionPerformed
+
+    private void trainingTrainBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_trainingTrainBtnActionPerformed
+        DatasetTrainer dt = new DatasetTrainer();
+        TrainedSet ts = dt.trainDataset(trainData);
+
+        trainingFileLabel.setText("Training Complete!");
+
+        //export feature map
+        int val = jfc.showSaveDialog(this);
+        if (val == JFileChooser.APPROVE_OPTION) {
+            CSVWriter writer = new CSVWriter();
+            writer.exportTrainedDataset(jfc.getSelectedFile().getPath(), ts);
+        }
+    }//GEN-LAST:event_trainingTrainBtnActionPerformed
+
+    private void classifyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_classifyBtnActionPerformed
+        Classifier classifier = new Classifier();
+        ConfusionMatrix cm = classifier.classifyTestSet(trainedData, testData);
+        
+        //export confusion matrix
+        int val = jfc.showSaveDialog(this);
+        if (val == JFileChooser.APPROVE_OPTION) {
+            CSVWriter writer = new CSVWriter();
+            writer.exportConfusionMatrix(jfc.getSelectedFile().getPath(), cm);
+        }
+    }//GEN-LAST:event_classifyBtnActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton classifyBtn;
+    private javax.swing.JLabel classifyLabel;
+    private javax.swing.JPanel classifyPanel;
     private javax.swing.JButton featureConstructBtn;
     private javax.swing.JButton featureFileBtn;
     private javax.swing.JLabel featureFileLabel;
     private javax.swing.JPanel featurePanel;
     private javax.swing.JLabel featureTitleLabel;
-    private javax.swing.JLabel featureTitleLabel1;
     private javax.swing.JLabel headerLabel;
     private javax.swing.JPanel headerPanel;
-    private javax.swing.JButton trainFileBtn;
-    private javax.swing.JLabel trainFileLabel;
-    private javax.swing.JPanel trainPanel;
-    private javax.swing.JButton trainStartBtn;
+    private javax.swing.JButton testFileBtn;
+    private javax.swing.JLabel testFileLabel;
+    private javax.swing.JButton trainedFileBtn;
+    private javax.swing.JLabel trainedFileLabel;
+    private javax.swing.JButton trainingFileBtn;
+    private javax.swing.JLabel trainingFileLabel;
+    private javax.swing.JPanel trainingPanel;
+    private javax.swing.JLabel trainingTitleLabel;
+    private javax.swing.JButton trainingTrainBtn;
     // End of variables declaration//GEN-END:variables
-
 }

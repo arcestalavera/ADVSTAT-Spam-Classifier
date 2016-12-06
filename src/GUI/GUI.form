@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<Form version="1.3" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
+<Form version="1.5" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="3"/>
     <Property name="title" type="java.lang.String" value="Spam Classifier"/>
@@ -26,7 +26,8 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Component id="headerPanel" max="32767" attributes="0"/>
           <Component id="featurePanel" alignment="0" max="32767" attributes="0"/>
-          <Component id="trainPanel" alignment="0" max="32767" attributes="0"/>
+          <Component id="classifyPanel" alignment="0" max="32767" attributes="0"/>
+          <Component id="trainingPanel" alignment="0" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
@@ -36,8 +37,9 @@
               <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
               <Component id="featurePanel" min="-2" max="-2" attributes="0"/>
               <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
-              <Component id="trainPanel" min="-2" max="-2" attributes="0"/>
+              <Component id="trainingPanel" min="-2" max="-2" attributes="0"/>
               <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
+              <Component id="classifyPanel" min="-2" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -85,7 +87,7 @@
                       <Component id="featureTitleLabel" max="32767" attributes="0"/>
                       <Component id="featureFileLabel" max="32767" attributes="0"/>
                       <Component id="featureFileBtn" alignment="0" max="32767" attributes="0"/>
-                      <Component id="featureConstructBtn" alignment="0" pref="262" max="32767" attributes="0"/>
+                      <Component id="featureConstructBtn" alignment="0" pref="266" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -150,7 +152,127 @@
         </Component>
       </SubComponents>
     </Container>
-    <Container class="javax.swing.JPanel" name="trainPanel">
+    <Container class="javax.swing.JPanel" name="classifyPanel">
+      <Properties>
+        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="ff" green="ff" red="ff" type="rgb"/>
+        </Property>
+      </Properties>
+
+      <Layout>
+        <DimensionLayout dim="0">
+          <Group type="103" groupAlignment="0" attributes="0">
+              <Group type="102" alignment="0" attributes="0">
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="classifyLabel" alignment="0" max="32767" attributes="0"/>
+                      <Component id="classifyBtn" alignment="0" pref="266" max="32767" attributes="0"/>
+                      <Group type="102" attributes="0">
+                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                              <Component id="trainedFileLabel" pref="130" max="32767" attributes="0"/>
+                              <Component id="trainedFileBtn" max="32767" attributes="0"/>
+                          </Group>
+                          <EmptySpace max="32767" attributes="0"/>
+                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                              <Component id="testFileLabel" alignment="0" max="32767" attributes="0"/>
+                              <Component id="testFileBtn" alignment="0" min="-2" pref="130" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
+              </Group>
+          </Group>
+        </DimensionLayout>
+        <DimensionLayout dim="1">
+          <Group type="103" groupAlignment="0" attributes="0">
+              <Group type="102" alignment="0" attributes="0">
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="classifyLabel" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="102" attributes="0">
+                          <Component id="trainedFileLabel" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="trainedFileBtn" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <Group type="102" attributes="0">
+                          <Component id="testFileLabel" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="testFileBtn" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="classifyBtn" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
+              </Group>
+          </Group>
+        </DimensionLayout>
+      </Layout>
+      <SubComponents>
+        <Component class="javax.swing.JLabel" name="classifyLabel">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Century Gothic" size="12" style="1"/>
+            </Property>
+            <Property name="horizontalAlignment" type="int" value="0"/>
+            <Property name="text" type="java.lang.String" value="Classify Spam Mails"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="trainedFileLabel">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Century Gothic" size="10" style="2"/>
+            </Property>
+            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+              <Color blue="66" green="66" red="66" type="rgb"/>
+            </Property>
+            <Property name="horizontalAlignment" type="int" value="0"/>
+            <Property name="text" type="java.lang.String" value="Select Trained File"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="trainedFileBtn">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Select File"/>
+            <Property name="focusable" type="boolean" value="false"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="trainedFileBtnActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JButton" name="classifyBtn">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Classify Test Dataset"/>
+            <Property name="enabled" type="boolean" value="false"/>
+            <Property name="focusable" type="boolean" value="false"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="classifyBtnActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JLabel" name="testFileLabel">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Century Gothic" size="10" style="2"/>
+            </Property>
+            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+              <Color blue="66" green="66" red="66" type="rgb"/>
+            </Property>
+            <Property name="horizontalAlignment" type="int" value="0"/>
+            <Property name="text" type="java.lang.String" value="Select Testing File"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="testFileBtn">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Select File"/>
+            <Property name="focusable" type="boolean" value="false"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="testFileBtnActionPerformed"/>
+          </Events>
+        </Component>
+      </SubComponents>
+    </Container>
+    <Container class="javax.swing.JPanel" name="trainingPanel">
       <Properties>
         <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="fa" green="fa" red="fa" type="rgb"/>
@@ -163,10 +285,10 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="featureTitleLabel1" alignment="0" max="32767" attributes="0"/>
-                      <Component id="trainFileLabel" alignment="0" max="32767" attributes="0"/>
-                      <Component id="trainFileBtn" alignment="0" max="32767" attributes="0"/>
-                      <Component id="trainStartBtn" alignment="0" pref="262" max="32767" attributes="0"/>
+                      <Component id="trainingTitleLabel" alignment="0" max="32767" attributes="0"/>
+                      <Component id="trainingFileLabel" alignment="0" max="32767" attributes="0"/>
+                      <Component id="trainingFileBtn" alignment="0" max="32767" attributes="0"/>
+                      <Component id="trainingTrainBtn" alignment="0" pref="266" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -176,29 +298,29 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="featureTitleLabel1" min="-2" max="-2" attributes="0"/>
+                  <Component id="trainingTitleLabel" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="trainFileLabel" min="-2" max="-2" attributes="0"/>
+                  <Component id="trainingFileLabel" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="trainFileBtn" min="-2" max="-2" attributes="0"/>
+                  <Component id="trainingFileBtn" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="trainStartBtn" min="-2" max="-2" attributes="0"/>
+                  <Component id="trainingTrainBtn" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Component class="javax.swing.JLabel" name="featureTitleLabel1">
+        <Component class="javax.swing.JLabel" name="trainingTitleLabel">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Century Gothic" size="12" style="1"/>
             </Property>
             <Property name="horizontalAlignment" type="int" value="0"/>
-            <Property name="text" type="java.lang.String" value="Train Machine"/>
+            <Property name="text" type="java.lang.String" value="Train Dataset"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JLabel" name="trainFileLabel">
+        <Component class="javax.swing.JLabel" name="trainingFileLabel">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Century Gothic" size="10" style="2"/>
@@ -210,18 +332,24 @@
             <Property name="text" type="java.lang.String" value="Please Select a File"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="trainFileBtn">
+        <Component class="javax.swing.JButton" name="trainingFileBtn">
           <Properties>
             <Property name="text" type="java.lang.String" value="Select File"/>
             <Property name="focusable" type="boolean" value="false"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="trainingFileBtnActionPerformed"/>
+          </Events>
         </Component>
-        <Component class="javax.swing.JButton" name="trainStartBtn">
+        <Component class="javax.swing.JButton" name="trainingTrainBtn">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Start Training"/>
+            <Property name="text" type="java.lang.String" value="Train Dataset"/>
             <Property name="enabled" type="boolean" value="false"/>
             <Property name="focusable" type="boolean" value="false"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="trainingTrainBtnActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

@@ -31,13 +31,7 @@ public class WordCounter {
         //Clean and organize content
         //convert to lower case
         body = body.toLowerCase();
-/*
-        //remove all punctuation marks
-        body = body.replaceAll("\\p{P}", "");
-
-        //remove greater than less than sign
-        body = body.replaceAll("<", "").replaceAll(">", "");
-*/
+        
         //remove all digits, special characters, and extra spaces 
         body = body.replaceAll("\\d", "").replaceAll("[^a-zA-Z0-9]", " ").replaceAll("\\s+", " ");
 
