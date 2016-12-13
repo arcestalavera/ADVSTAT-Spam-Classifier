@@ -364,7 +364,9 @@ public class GUI extends javax.swing.JFrame {
 
             //update GUI
             trainedFileLabel.setText("Trained Data Ready!");
-            classifyCount++;
+            if (classifyCount < 2) {
+                classifyCount++;
+            }
 
             if (classifyCount == 2) {
                 canClassify = true;
@@ -372,7 +374,9 @@ public class GUI extends javax.swing.JFrame {
         } else {
             trainedFileLabel.setText("Select Trained File");
 
-            classifyCount--;
+            if (classifyCount >= 0) {
+                classifyCount--;
+            }
             canClassify = false;
         }
 
@@ -390,7 +394,9 @@ public class GUI extends javax.swing.JFrame {
 
             testFileLabel.setText("Test Data Ready!");
 
-            classifyCount++;
+            if (classifyCount < 2) {
+                classifyCount++;
+            }
 
             if (classifyCount == 2) {
                 canClassify = true;
@@ -398,7 +404,9 @@ public class GUI extends javax.swing.JFrame {
         } else {
             trainedFileLabel.setText("Select Test File");
 
-            classifyCount--;
+            if (classifyCount >= 0) {
+                classifyCount--;
+            }
             canClassify = false;
         }
 
@@ -413,7 +421,7 @@ public class GUI extends javax.swing.JFrame {
         int val = jfc.showOpenDialog(this);
         if (val == JFileChooser.APPROVE_OPTION) {
             trainData = reader.readEmail(jfc.getSelectedFile());
-            
+
             trainingFileLabel.setText("Training of Dataset Ready!");
             trainingTrainBtn.setEnabled(true);
         }
@@ -436,7 +444,7 @@ public class GUI extends javax.swing.JFrame {
     private void classifyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_classifyBtnActionPerformed
         Classifier classifier = new Classifier();
         ConfusionMatrix cm = classifier.classifyTestSet(trainedData, testData);
-        
+
         //export confusion matrix
         int val = jfc.showSaveDialog(this);
         if (val == JFileChooser.APPROVE_OPTION) {

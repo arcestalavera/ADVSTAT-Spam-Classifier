@@ -29,18 +29,21 @@ public class Classifier {
         for (Email email : testSet) {
             System.out.println("Email # " + i + " / " + testSet.size());
             i++;
-            
+
             spamProb = Math.log(trainedSet.getPriorProbability()[0]);
             nonSpamProb = Math.log(trainedSet.getPriorProbability()[1]);
             //get words of email in test set
             wordList = email.getWordList();
+
             //for every word in the email, multiply their probability
             for (Word word : wordList) {
-                //P(spam|d)
-                spamProb += Math.log(trainedSet.getSpamWordProbability(word.getWord()));
+                //for (int j = 0; j < word.getCount(); j++) {
+                    //P(spam|d)
+                    spamProb += Math.log(trainedSet.getSpamWordProbability(word.getWord())) * word.getCount();
 
-                //P(not spam|d)
-                nonSpamProb += Math.log(trainedSet.getNonSpamWordProbability(word.getWord()));
+                    //P(not spam|d)
+                    nonSpamProb += Math.log(trainedSet.getNonSpamWordProbability(word.getWord())) * word.getCount();
+                //}
             }
 
             if (spamProb > nonSpamProb) { // if output prediction is spam
